@@ -3,96 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Get Keys</title>
+<title>Get Keys - Full Features</title>
 <style>
-/* Body */
 body {
-  margin:0;
-  padding:0;
-  font-family: 'Segoe UI', sans-serif;
+  margin:0; padding:0;
+  font-family:'Segoe UI', sans-serif;
   background: linear-gradient(135deg,#1f1c2c,#928dab);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
+  display:flex; justify-content:center; align-items:center; height:100vh;
 }
-
-/* Container */
 #container {
-  background:#2c2c3e;
-  border-radius:16px;
-  padding:30px;
-  width:480px;
-  box-shadow:0 0 20px rgba(0,0,0,0.5);
+  background:#2c2c3e; border-radius:20px; padding:30px; width:480px;
+  box-shadow:0 0 25px rgba(0,0,0,0.6);
 }
-
-/* Titles */
 h2,h3 { text-align:center; margin-bottom:15px; color:#fff; }
-
-/* Textarea */
-#keyBox {
-  width:100%;
-  height:200px;
-  border-radius:12px;
-  padding:12px;
-  border:none;
-  resize:none;
-  background:#1a1a2e;
-  color:#fff;
-  font-size:15px;
-  line-height:1.4;
-}
-
-/* Inputs */
-input[type="text"], input[type="number"] {
-  width:calc(100% - 24px);
-  padding:10px;
-  margin-top:10px;
-  border-radius:10px;
-  border:1px solid #555;
-  background:#1a1a2e;
-  color:#fff;
-  font-size:14px;
-}
-
-/* Buttons */
+#keyBox { width:100%; height:200px; border-radius:15px; padding:12px; border:none; resize:none; background:#1a1a2e; color:#fff; font-size:15px; line-height:1.5; }
+input[type="text"], input[type="number"] { width:calc(100% - 24px); padding:10px; margin-top:10px; border-radius:12px; border:1px solid #555; background:#1a1a2e; color:#fff; font-size:14px; }
 button {
-  margin-top:10px;
-  padding:10px 18px;
-  border:none;
-  border-radius:10px;
-  font-weight:bold;
-  cursor:pointer;
-  transition:0.2s;
+  margin-top:10px; padding:12px 20px; border:none; border-radius:12px; font-weight:bold; cursor:pointer; transition:0.2s;
 }
-
-#copyBtn { background:#4caf50; color:#fff; }
-#copyBtn:hover { background:#45a049; }
-#clearBtn { background:#f44336; color:#fff; }
-#clearBtn:hover { background:#e53935; }
-#tokenBtn { background:#ff9800; color:#fff; }
-#tokenBtn:hover { background:#fb8c00; }
-#addKeyBtn { background:#9c27b0; color:#fff; }
-#addKeyBtn:hover { background:#8e24aa; }
-#saveResetBtn { background:#03a9f4; color:#fff; }
-#saveResetBtn:hover { background:#0288d1; }
-
-/* Owner Panel */
-#ownerPanel {
-  display:none;
-  margin-top:15px;
-  background:#3a3a50;
-  padding:15px;
-  border-radius:12px;
-}
-
-/* Info Buy */
-#infoBuy {
-  margin-top:15px;
-  font-size:14px;
-  color:#ccc;
-  text-align:center;
-}
+#copyBtn { background:#4caf50;color:#fff; } #copyBtn:hover { background:#45a049; }
+#clearBtn { background:#f44336;color:#fff; } #clearBtn:hover { background:#e53935; }
+#tokenBtn { background:#ff9800;color:#fff; } #tokenBtn:hover { background:#fb8c00; }
+#addKeyBtn { background:#9c27b0;color:#fff; } #addKeyBtn:hover { background:#8e24aa; }
+#saveResetBtn { background:#03a9f4;color:#fff; } #saveResetBtn:hover { background:#0288d1; }
+#ownerPanel { display:none; margin-top:15px; background:#3a3a50; padding:15px; border-radius:15px; box-shadow:0 0 15px rgba(0,0,0,0.3);}
+#infoBuy { margin-top:15px; font-size:14px; color:#ccc; text-align:center; }
 </style>
 </head>
 <body>
@@ -101,10 +36,8 @@ button {
 <textarea id="keyBox" readonly></textarea><br>
 <button id="copyBtn">Copy Keys</button>
 <button id="clearBtn">Clear</button><br>
-
 <input type="text" id="tokenInput" placeholder="Enter Owner Token"/>
 <button id="tokenBtn">Confirm Owner</button>
-
 <div id="ownerPanel">
 <h3>Owner Panel</h3>
 <input type="text" id="newKeyInput" placeholder="Add New Key"/>
@@ -113,31 +46,30 @@ button {
 <input type="number" id="resetTime" min="0" max="23" value="0"/>
 <button id="saveResetBtn">Save Reset</button>
 </div>
-
 <div id="infoBuy">
 <b>Note:</b> VIP key chỉ có thể mua hoặc nhận trực tiếp từ Owner.<br>
 Liên hệ: <i>tk tn_hachoa</i>
 </div>
 </div>
-
 <script>
 const KEY_URL = "https://raw.githubusercontent.com/huybeen90-star/key/main/key.txt";
 const OWNER_TOKEN = "Vip-kaiwbsnzv";
 const VIP_KEYS = ["Free-12la4gbahu"];
 let keysDisplay = [];
 
-// Unobfus key (Free- thì giữ nguyên)
+// Unobfus key Free
 function unobfus(line){
-    return line;
+    return line.startsWith("Free-") ? line : "";
 }
 
-// Fetch keys
+// Fetch key.txt
 fetch(KEY_URL)
 .then(res=>res.text())
 .then(data=>{
     keysDisplay = data.split("\n").map(l=>unobfus(l)).filter(l=>l);
     document.getElementById("keyBox").value = keysDisplay.join("\n");
-});
+})
+.catch(err => alert("Không lấy được key Free!"));
 
 // Copy keys
 document.getElementById("copyBtn").addEventListener("click",()=>{
