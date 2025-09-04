@@ -1,150 +1,66 @@
-<!doctype html>
-<html lang="vi">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Key hôm nay</title>
+<title>Get Keys</title>
 <style>
-body{font-family:sans-serif;background:#0f1720;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
-.card{background:#111827;padding:30px;border-radius:12px;text-align:center;max-width:400px;width:90%}
-h1{margin-bottom:10px}
-.key{font-size:32px;font-weight:bold;margin:20px 0;display:block;background:rgba(255,255,255,0.05);padding:10px;border-radius:8px}
-button{padding:10px 16px;margin:5px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}
-button.copy{background:#60a5fa;color:#06202b}
-button.refresh{background:#374151;color:#fff}
-button.link{background:#34d399;color:#06202b}
-input{padding:6px;margin:5px;border-radius:6px;border:none;width:60%;text-align:center}
-.small{font-size:13px;color:#cbd5e1;margin-top:10px}
-.owner-section{margin-top:15px;background:rgba(255,255,255,0.05);padding:10px;border-radius:8px;display:none}
+body { font-family: Arial; background: #1e1e1e; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; }
+#container { background: #2e2e2e; padding: 20px; border-radius: 12px; text-align: center; width: 450px; }
+textarea { width: 100%; height: 200px; border-radius: 8px; padding: 10px; resize: none; background: #1e1e1e; color: #fff; border: 1px solid #555; margin-top:10px;}
+button { margin-top: 10px; padding: 10px 20px; border-radius: 8px; border: none; background: #4caf50; color: #fff; cursor: pointer; }
+button:hover { background: #45a049; }
+input { width: 80%; padding: 8px; margin-top:10px; border-radius: 6px; border: 1px solid #555; background: #1e1e1e; color: #fff; }
 </style>
 </head>
 <body>
-<div class="card">
-  <h1>🔑 Key hôm nay</h1>
-  <span id="keyVal" class="key">Loading...</span>
-
-  <div>
-    <button class="copy" id="copyBtn">📋 Copy Key</button>
-    <button class="refresh" id="refreshBtn">⟳ Làm mới</button>
-    <button class="link" id="linkBtn">🔗 Open Linkvertise</button>
-  </div>
-
-  <div class="small" id="contactInfo">kb với tk tn_hachoa để nhận key vĩnh viễn hoặc mua key</div>
-
-  <!-- Owner Token -->
-  <div class="owner-token" id="ownerTokenSection">
-    <p><strong>Nhập token Owner</strong></p>
-    <input type="text" id="ownerTokenInput" placeholder="Nhập token VIP">
-    <button id="ownerTokenBtn">Xác nhận</button>
-  </div>
-
-  <!-- Owner Panel -->
-  <div class="owner-section" id="ownerSection">
-    <p><strong>Owner Panel</strong></p>
-    <label>Thời gian reset (giờ GMT+7): </label>
-    <input type="number" id="resetHour" value="0" min="0" max="23"><br>
-    <label>Thêm key mới: </label>
-    <input type="text" id="newKey" placeholder="Nhập key mới">
-    <button id="addKeyBtn">Thêm key</button>
-  </div>
+<div id="container">
+<h2>Get Keys</h2>
+<textarea id="keyBox" readonly></textarea>
+<br>
+<button id="copyBtn">Copy Keys</button>
+<br>
+<input type="text" id="tokenInput" placeholder="Enter Owner Token"/>
+<button id="tokenBtn">Confirm Owner</button>
 </div>
 
 <script>
-// --- Cấu hình ---
-const KEYS_URL = "https://raw.githubusercontent.com/huybeen90-star/key.vip/main/key.txt"; // GitHub raw link
-const VIP_KEY = "Free-12la4gbahu";
-const TARGET_LINK = "https://linkvertise.com/123456/your-target-page";
-let KEYS = [];
-let todayKey = "";
-let RESET_HOUR = 0; // mặc định 00:00 GMT+7
-const OWNER_VIP_TOKEN = "Vip-kaiwbsnzv";
+const KEY_URL = "https://raw.githubusercontent.com/huybeen90-star/key/main/key.txt";
+const OWNER_TOKEN = "Vip-kaiwbsnzv";
+const VIP_KEYS = ["Free-12la4gbahu"]; // Key VIP vĩnh viễn
 
-// --- Fetch key từ GitHub ---
-async function fetchKeys(){
-  try{
-    const resp = await fetch(KEYS_URL);
-    const text = await resp.text();
-    KEYS = text.split(/\r?\n/).filter(l=>l.trim()!=="");
-    KEYS.push(VIP_KEY); // thêm VIP key ẩn
-    pickTodayKey();
-  }catch(e){
-    console.error("Không tải được key từ GitHub", e);
-    document.getElementById("keyVal").textContent = "❌ Lỗi tải key";
-  }
+function unobfus(str) {
+    return str.split("-").map(n => String.fromCharCode(Number(n)-7)).join("");
 }
 
-// --- Chọn key daily ngẫu nhiên ổn định ---
-function getDateString(){
-  const now = new Date();
-  const tzMillis = now.getTime() + RESET_HOUR*3600*1000;
-  const tzDate = new Date(tzMillis);
-  const Y = tzDate.getUTCFullYear();
-  const M = ("0"+(tzDate.getUTCMonth()+1)).slice(-2);
-  const D = ("0"+tzDate.getUTCDate()).slice(-2);
-  return `${Y}${M}${D}`;
-}
-
-function pickTodayKey(){
-  if(KEYS.length===0) return;
-  const dateStr = getDateString();
-  let hash = 0;
-  for(let i=0;i<dateStr.length;i++) hash+=dateStr.charCodeAt(i);
-  todayKey = KEYS[hash % KEYS.length];
-  document.getElementById("keyVal").textContent = todayKey;
-}
-
-// --- Nút Copy Key ---
-document.getElementById("copyBtn").addEventListener("click", ()=>{
-  if(todayKey==="") return;
-  navigator.clipboard.writeText(todayKey).then(()=> alert("Đã copy key: "+todayKey));
+// fetch key obfus từ GitHub
+let keysDisplay = [];
+fetch(KEY_URL)
+.then(res => res.text())
+.then(data => {
+    keysDisplay = data.split("\n").map(line => unobfus(line)).filter(l=>l);
+    document.getElementById("keyBox").value = keysDisplay.join("\n");
 });
 
-// --- Nút Refresh ---
-document.getElementById("refreshBtn").addEventListener("click", ()=>{
-  pickTodayKey();
+// Copy button
+document.getElementById("copyBtn").addEventListener("click", () => {
+    const keyBox = document.getElementById("keyBox");
+    keyBox.select();
+    document.execCommand("copy");
+    alert("Keys copied!");
 });
 
-// --- Nút Open Linkvertise ---
-document.getElementById("linkBtn").addEventListener("click", ()=>{
-  if(todayKey==="") return;
-  const link = TARGET_LINK + "?key=" + encodeURIComponent(todayKey);
-  window.open(link,"_blank");
+// Token Owner
+document.getElementById("tokenBtn").addEventListener("click", () => {
+    const token = document.getElementById("tokenInput").value;
+    if(token === OWNER_TOKEN){
+        // thêm key VIP vào textarea
+        document.getElementById("keyBox").value = keysDisplay.concat(VIP_KEYS).join("\n");
+        alert("Owner Access: VIP keys added!");
+    } else {
+        alert("Invalid Token");
+    }
 });
-
-// --- Owner token ---
-document.getElementById("ownerTokenBtn").addEventListener("click", ()=>{
-  const token = document.getElementById("ownerTokenInput").value.trim();
-  if(token === OWNER_VIP_TOKEN){
-    alert("✅ Token hợp lệ! Owner Panel đã mở.");
-    document.getElementById("ownerSection").style.display = "block";
-    document.getElementById("ownerTokenSection").style.display = "none";
-    document.getElementById("contactInfo").style.display = "none";
-  }else{
-    alert("❌ Token sai!");
-  }
-});
-
-// --- Owner thêm key ---
-document.getElementById("addKeyBtn")?.addEventListener("click", ()=>{
-  const newKey = document.getElementById("newKey").value.trim();
-  if(newKey==="") return;
-  KEYS.push(newKey);
-  alert("✅ Đã thêm key: "+newKey+"\nMuốn tồn tại vĩnh viễn, hãy cập nhật GitHub.");
-  document.getElementById("newKey").value = "";
-  pickTodayKey();
-});
-
-// --- Owner chỉnh giờ reset ---
-document.getElementById("resetHour")?.addEventListener("change", ()=>{
-  const val = parseInt(document.getElementById("resetHour").value);
-  if(!isNaN(val) && val>=0 && val<=23){
-    RESET_HOUR = val;
-    pickTodayKey();
-  }
-});
-
-// --- Khởi tạo ---
-fetchKeys();
 </script>
 </body>
 </html>
