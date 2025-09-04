@@ -11,54 +11,85 @@ textarea { width: 100%; height: 200px; border-radius: 8px; padding: 10px; resize
 button { margin-top: 10px; padding: 10px 20px; border-radius: 8px; border: none; background: #4caf50; color: #fff; cursor: pointer; }
 button:hover { background: #45a049; }
 input { width: 80%; padding: 8px; margin-top:10px; border-radius: 6px; border: 1px solid #555; background: #1e1e1e; color: #fff; }
+#ownerPanel { display:none; margin-top:10px; background:#3a3a3a; padding:10px; border-radius:8px;}
 </style>
 </head>
 <body>
 <div id="container">
 <h2>Get Keys</h2>
-<textarea id="keyBox" readonly></textarea>
-<br>
-<button id="copyBtn">Copy Keys</button>
-<br>
+<textarea id="keyBox" readonly></textarea><br>
+<button id="copyBtn">Copy Keys</button><br>
 <input type="text" id="tokenInput" placeholder="Enter Owner Token"/>
 <button id="tokenBtn">Confirm Owner</button>
+
+<div id="ownerPanel">
+<h3>Owner Panel</h3>
+<input type="text" id="newKeyInput" placeholder="Add New Key"/>
+<button id="addKeyBtn">Add Key</button><br>
+<label>Reset Time (hour 0-23):</label>
+<input type="number" id="resetTime" min="0" max="23" value="0"/>
+<button id="saveResetBtn">Save Reset</button>
+</div>
 </div>
 
 <script>
 const KEY_URL = "https://raw.githubusercontent.com/huybeen90-star/key/main/key.txt";
 const OWNER_TOKEN = "Vip-kaiwbsnzv";
-const VIP_KEYS = ["Free-12la4gbahu"]; // Key VIP vĩnh viễn
+const VIP_KEYS = ["Free-12la4gbahu"]; // key vĩnh viễn
 
-function unobfus(str) {
-    return str.split("-").map(n => String.fromCharCode(Number(n)-7)).join("");
+function unobfus(str){
+    return str.split("-").map(n=>String.fromCharCode(Number(n)-7)).join("");
 }
 
-// fetch key obfus từ GitHub
 let keysDisplay = [];
+// fetch keys obfus từ GitHub
 fetch(KEY_URL)
-.then(res => res.text())
-.then(data => {
-    keysDisplay = data.split("\n").map(line => unobfus(line)).filter(l=>l);
+.then(res=>res.text())
+.then(data=>{
+    keysDisplay = data.split("\n").map(line=>unobfus(line)).filter(l=>l);
     document.getElementById("keyBox").value = keysDisplay.join("\n");
 });
 
-// Copy button
-document.getElementById("copyBtn").addEventListener("click", () => {
+// Copy keys
+document.getElementById("copyBtn").addEventListener("click",()=>{
     const keyBox = document.getElementById("keyBox");
     keyBox.select();
     document.execCommand("copy");
     alert("Keys copied!");
 });
 
-// Token Owner
-document.getElementById("tokenBtn").addEventListener("click", () => {
+// Owner token
+document.getElementById("tokenBtn").addEventListener("click",()=>{
     const token = document.getElementById("tokenInput").value;
-    if(token === OWNER_TOKEN){
-        // thêm key VIP vào textarea
+    if(token===OWNER_TOKEN){
+        document.getElementById("ownerPanel").style.display="block";
+        // Thêm VIP key
         document.getElementById("keyBox").value = keysDisplay.concat(VIP_KEYS).join("\n");
         alert("Owner Access: VIP keys added!");
     } else {
         alert("Invalid Token");
+    }
+});
+
+// Thêm key mới (Owner)
+document.getElementById("addKeyBtn").addEventListener("click",()=>{
+    const newKey = document.getElementById("newKeyInput").value;
+    if(newKey!==""){
+        keysDisplay.push(newKey);
+        document.getElementById("keyBox").value = keysDisplay.concat(VIP_KEYS).join("\n");
+        document.getElementById("newKeyInput").value="";
+        alert("New key added!");
+    }
+});
+
+// Chỉnh thời gian reset (Owner)
+document.getElementById("saveResetBtn").addEventListener("click",()=>{
+    const t = document.getElementById("resetTime").value;
+    if(t>=0 && t<=23){
+        localStorage.setItem("resetHour", t);
+        alert("Reset hour saved: "+t+"h");
+    } else {
+        alert("Invalid hour");
     }
 });
 </script>
