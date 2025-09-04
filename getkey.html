@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Key hôm nay</title>
+<style>
+body{font-family:sans-serif;background:#0f1720;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
+.card{background:#111827;padding:30px;border-radius:12px;text-align:center;max-width:400px;width:90%}
+h1{margin-bottom:10px}
+.key{font-size:32px;font-weight:bold;margin:20px 0;display:block;background:rgba(255,255,255,0.05);padding:10px;border-radius:8px}
+button{padding:10px 16px;margin:5px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}
+button.copy{background:#60a5fa;color:#06202b}
+button.refresh{background:#374151;color:#fff}
+button.link{background:#34d399;color:#06202b}
+input{padding:6px;margin:5px;border-radius:6px;border:none;width:60%;text-align:center}
+.small{font-size:13px;color:#cbd5e1;margin-top:10px}
+.owner-section{margin-top:15px;background:rgba(255,255,255,0.05);padding:10px;border-radius:8px;display:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🔑 Key hôm nay</h1>
+  <span id="keyVal" class="key">Loading...</span>
+
+  <div>
+    <button class="copy" id="copyBtn">📋 Copy Key</button>
+    <button class="refresh" id="refreshBtn">⟳ Làm mới</button>
+    <button class="link" id="linkBtn">🔗 Open Linkvertise</button>
+  </div>
+
+  <div class="small" id="contactInfo">kb với tk tn_hachoa để nhận key vĩnh viễn hoặc mua key</div>
+
+  <!-- Owner Token -->
+  <div class="owner-token" id="ownerTokenSection">
+    <p><strong>Nhập token Owner</strong></p>
+    <input type="text" id="ownerTokenInput" placeholder="Nhập token VIP">
+    <button id="ownerTokenBtn">Xác nhận</button>
+  </div>
+
+  <!-- Owner Panel -->
+  <div class="owner-section" id="ownerSection">
+    <p><strong>Owner Panel</strong></p>
+    <label>Thời gian reset (giờ GMT+7): </label>
+    <input type="number" id="resetHour" value="0" min="0" max="23"><br>
+    <label>Thêm key mới: </label>
+    <input type="text" id="newKey" placeholder="Nhập key mới">
+    <button id="addKeyBtn">Thêm key</button>
+  </div>
+</div>
+
+<script>
+// --- Cấu hình ---
+const KEYS_URL = "https://raw.githubusercontent.com/huybeen90-star/key.vip/main/key.txt"; // GitHub raw link
+const VIP_KEY = "Free-12la4gbahu";
+const TARGET_LINK = "https://linkvertise.com/123456/your-target-page";
+let KEYS = [];
+let todayKey = "";
+let RESET_HOUR = 0; // mặc định 00:00 GMT+7
+const OWNER_VIP_TOKEN = "Vip-kaiwbsnzv";
+
+// --- Fetch key từ GitHub ---
+async function fetchKeys(){
+  try{
+    const resp = await fetch(KEYS_URL);
+    const text = await resp.text();
+    KEYS = text.split(/\r?\n/).filter(l=>l.trim()!=="");
+    KEYS.push(VIP_KEY); // thêm VIP key ẩn
+    pickTodayKey();
+  }catch(e){
+    console.error("Không tải được key từ GitHub", e);
+    document.getElementById("keyVal").textContent = "❌ Lỗi tải key";
+  }
+}
+
+// --- Chọn key daily ngẫu nhiên ổn định ---
+function getDateString(){
+  const now = new Date();
+  const tzMillis = now.getTime() + RESET_HOUR*3600*1000;
+  const tzDate = new Date(tzMillis);
+  const Y = tzDate.getUTCFullYear();
+  const M = ("0"+(tzDate.getUTCMonth()+1)).slice(-2);
+  const D = ("0"+tzDate.getUTCDate()).slice(-2);
+  return `${Y}${M}${D}`;
+}
+
+function pickTodayKey(){
+  if(KEYS.length===0) return;
+  const dateStr = getDateString();
+  let hash = 0;
+  for(let i=0;i<dateStr.length;i++) hash+=dateStr.charCodeAt(i);
+  todayKey = KEYS[hash % KEYS.length];
+  document.getElementById("keyVal").textContent = todayKey;
+}
+
+// --- Nút Copy Key ---
+document.getElementById("copyBtn").addEventListener("click", ()=>{
+  if(todayKey==="") return;
+  navigator.clipboard.writeText(todayKey).then(()=> alert("Đã copy key: "+todayKey));
+});
+
+// --- Nút Refresh ---
+document.getElementById("refreshBtn").addEventListener("click", ()=>{
+  pickTodayKey();
+});
+
+// --- Nút Open Linkvertise ---
+document.getElementById("linkBtn").addEventListener("click", ()=>{
+  if(todayKey==="") return;
+  const link = TARGET_LINK + "?key=" + encodeURIComponent(todayKey);
+  window.open(link,"_blank");
+});
+
+// --- Owner token ---
+document.getElementById("ownerTokenBtn").addEventListener("click", ()=>{
+  const token = document.getElementById("ownerTokenInput").value.trim();
+  if(token === OWNER_VIP_TOKEN){
+    alert("✅ Token hợp lệ! Owner Panel đã mở.");
+    document.getElementById("ownerSection").style.display = "block";
+    document.getElementById("ownerTokenSection").style.display = "none";
+    document.getElementById("contactInfo").style.display = "none";
+  }else{
+    alert("❌ Token sai!");
+  }
+});
+
+// --- Owner thêm key ---
+document.getElementById("addKeyBtn")?.addEventListener("click", ()=>{
+  const newKey = document.getElementById("newKey").value.trim();
+  if(newKey==="") return;
+  KEYS.push(newKey);
+  alert("✅ Đã thêm key: "+newKey+"\nMuốn tồn tại vĩnh viễn, hãy cập nhật GitHub.");
+  document.getElementById("newKey").value = "";
+  pickTodayKey();
+});
+
+// --- Owner chỉnh giờ reset ---
+document.getElementById("resetHour")?.addEventListener("change", ()=>{
+  const val = parseInt(document.getElementById("resetHour").value);
+  if(!isNaN(val) && val>=0 && val<=23){
+    RESET_HOUR = val;
+    pickTodayKey();
+  }
+});
+
+// --- Khởi tạo ---
+fetchKeys();
+</script>
+</body>
+</html>
