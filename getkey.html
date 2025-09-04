@@ -5,20 +5,103 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Get Keys</title>
 <style>
-body { font-family: Arial; background: #1e1e1e; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; }
-#container { background: #2e2e2e; padding: 20px; border-radius: 12px; text-align: center; width: 450px; }
-textarea { width: 100%; height: 200px; border-radius: 8px; padding: 10px; resize: none; background: #1e1e1e; color: #fff; border: 1px solid #555; margin-top:10px;}
-button { margin-top: 10px; padding: 10px 20px; border-radius: 8px; border: none; background: #4caf50; color: #fff; cursor: pointer; }
-button:hover { background: #45a049; }
-input { width: 80%; padding: 8px; margin-top:10px; border-radius: 6px; border: 1px solid #555; background: #1e1e1e; color: #fff; }
-#ownerPanel { display:none; margin-top:10px; background:#3a3a3a; padding:10px; border-radius:8px;}
+/* Body */
+body {
+  margin:0;
+  padding:0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg,#1f1c2c,#928dab);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+/* Container */
+#container {
+  background:#2c2c3e;
+  border-radius:16px;
+  padding:30px;
+  width:480px;
+  box-shadow:0 0 20px rgba(0,0,0,0.5);
+}
+
+/* Titles */
+h2,h3 { text-align:center; margin-bottom:15px; color:#fff; }
+
+/* Textarea */
+#keyBox {
+  width:100%;
+  height:200px;
+  border-radius:12px;
+  padding:12px;
+  border:none;
+  resize:none;
+  background:#1a1a2e;
+  color:#fff;
+  font-size:15px;
+  line-height:1.4;
+}
+
+/* Inputs */
+input[type="text"], input[type="number"] {
+  width:calc(100% - 24px);
+  padding:10px;
+  margin-top:10px;
+  border-radius:10px;
+  border:1px solid #555;
+  background:#1a1a2e;
+  color:#fff;
+  font-size:14px;
+}
+
+/* Buttons */
+button {
+  margin-top:10px;
+  padding:10px 18px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+#copyBtn { background:#4caf50; color:#fff; }
+#copyBtn:hover { background:#45a049; }
+#clearBtn { background:#f44336; color:#fff; }
+#clearBtn:hover { background:#e53935; }
+#tokenBtn { background:#ff9800; color:#fff; }
+#tokenBtn:hover { background:#fb8c00; }
+#addKeyBtn { background:#9c27b0; color:#fff; }
+#addKeyBtn:hover { background:#8e24aa; }
+#saveResetBtn { background:#03a9f4; color:#fff; }
+#saveResetBtn:hover { background:#0288d1; }
+
+/* Owner Panel */
+#ownerPanel {
+  display:none;
+  margin-top:15px;
+  background:#3a3a50;
+  padding:15px;
+  border-radius:12px;
+}
+
+/* Info Buy */
+#infoBuy {
+  margin-top:15px;
+  font-size:14px;
+  color:#ccc;
+  text-align:center;
+}
 </style>
 </head>
 <body>
 <div id="container">
 <h2>Get Keys</h2>
 <textarea id="keyBox" readonly></textarea><br>
-<button id="copyBtn">Copy Keys</button><br>
+<button id="copyBtn">Copy Keys</button>
+<button id="clearBtn">Clear</button><br>
+
 <input type="text" id="tokenInput" placeholder="Enter Owner Token"/>
 <button id="tokenBtn">Confirm Owner</button>
 
@@ -26,27 +109,33 @@ input { width: 80%; padding: 8px; margin-top:10px; border-radius: 6px; border: 1
 <h3>Owner Panel</h3>
 <input type="text" id="newKeyInput" placeholder="Add New Key"/>
 <button id="addKeyBtn">Add Key</button><br>
-<label>Reset Time (hour 0-23):</label>
+<label>Reset Time (0-23h):</label>
 <input type="number" id="resetTime" min="0" max="23" value="0"/>
 <button id="saveResetBtn">Save Reset</button>
+</div>
+
+<div id="infoBuy">
+<b>Note:</b> VIP key chỉ có thể mua hoặc nhận trực tiếp từ Owner.<br>
+Liên hệ: <i>tk tn_hachoa</i>
 </div>
 </div>
 
 <script>
 const KEY_URL = "https://raw.githubusercontent.com/huybeen90-star/key/main/key.txt";
 const OWNER_TOKEN = "Vip-kaiwbsnzv";
-const VIP_KEYS = ["Free-12la4gbahu"]; // key vĩnh viễn
+const VIP_KEYS = ["Free-12la4gbahu"];
+let keysDisplay = [];
 
-function unobfus(str){
-    return str.split("-").map(n=>String.fromCharCode(Number(n)-7)).join("");
+// Unobfus key (Free- thì giữ nguyên)
+function unobfus(line){
+    return line;
 }
 
-let keysDisplay = [];
-// fetch keys obfus từ GitHub
+// Fetch keys
 fetch(KEY_URL)
 .then(res=>res.text())
 .then(data=>{
-    keysDisplay = data.split("\n").map(line=>unobfus(line)).filter(l=>l);
+    keysDisplay = data.split("\n").map(l=>unobfus(l)).filter(l=>l);
     document.getElementById("keyBox").value = keysDisplay.join("\n");
 });
 
@@ -58,12 +147,16 @@ document.getElementById("copyBtn").addEventListener("click",()=>{
     alert("Keys copied!");
 });
 
-// Owner token
+// Clear textarea
+document.getElementById("clearBtn").addEventListener("click",()=>{
+    document.getElementById("keyBox").value="";
+});
+
+// Token Owner
 document.getElementById("tokenBtn").addEventListener("click",()=>{
-    const token = document.getElementById("tokenInput").value;
+    const token = document.getElementById("tokenInput").value.trim();
     if(token===OWNER_TOKEN){
         document.getElementById("ownerPanel").style.display="block";
-        // Thêm VIP key
         document.getElementById("keyBox").value = keysDisplay.concat(VIP_KEYS).join("\n");
         alert("Owner Access: VIP keys added!");
     } else {
@@ -71,9 +164,9 @@ document.getElementById("tokenBtn").addEventListener("click",()=>{
     }
 });
 
-// Thêm key mới (Owner)
+// Add key (Owner)
 document.getElementById("addKeyBtn").addEventListener("click",()=>{
-    const newKey = document.getElementById("newKeyInput").value;
+    const newKey = document.getElementById("newKeyInput").value.trim();
     if(newKey!==""){
         keysDisplay.push(newKey);
         document.getElementById("keyBox").value = keysDisplay.concat(VIP_KEYS).join("\n");
@@ -82,7 +175,7 @@ document.getElementById("addKeyBtn").addEventListener("click",()=>{
     }
 });
 
-// Chỉnh thời gian reset (Owner)
+// Save reset hour (Owner)
 document.getElementById("saveResetBtn").addEventListener("click",()=>{
     const t = document.getElementById("resetTime").value;
     if(t>=0 && t<=23){
